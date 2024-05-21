@@ -11,19 +11,46 @@ function love.load()
   player = {}
   player.x = love.graphics.getWidth()/2
   player.y = love.graphics.getHeight()/2
+  player.speed = 180
 
-
+  tempRotation = 0
   gameFont = love.graphics.newFont(40)
 end
 
 
 function love.update(dt)
+  if love.keyboard.isDown("d") then
+    player.x = player.x + player.speed*dt
+  end
+  if love.keyboard.isDown("a") then
+    player.x = player.x - player.speed*dt
+  end
+  if love.keyboard.isDown("w") then
+    player.y = player.y - player.speed*dt
+  end
+  if love.keyboard.isDown("s") then
+    player.y = player.y + player.speed*dt
+  end
 
+  tempRotation = tempRotation + 0.01
 end
 
 function love.draw()
   love.graphics.draw(sprites.background)
   -- love.graphics.setFont(gameFont)
   -- love.graphics.print("Score: " ..score, 5,5)
-  love.graphics.draw(sprites.player, player.x, player.y)
+  love.graphics.draw(
+    sprites.player, 
+    player.x, 
+    player.y, 
+    playerMouseAngle(), 
+    nil, 
+    nil, 
+    sprites.player:getWidth()/2, 
+    sprites.player:getHeight()/2
+  )
+end
+
+function playerMouseAngle()
+  return math.atan2(player.y - love.mouse.getY(), player.x - love.mouse.getX()) + math.pi
 end
