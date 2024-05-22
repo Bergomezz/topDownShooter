@@ -11,6 +11,8 @@ function love.load()
   player.x = love.graphics.getWidth()/2
   player.y = love.graphics.getHeight()/2
   player.speed = 180
+  player.injured =false
+  player.injuredSpeed = 270
 
   myFont = love.graphics.newFont(30)
 
@@ -18,25 +20,31 @@ function love.load()
   bullets = {}
 
   gameState = 1
-  maxTime = 2
   score = 0
+  maxTime = 2
   timer = maxTime
 end
 
 
 function love.update(dt)
   if gameState == 2 then
+    local moveSpeed = player.speed
+
+    if player.injured then
+      moveSpeed = player.injuredSpeed
+    end
+
     if love.keyboard.isDown("d") and player.x < love.graphics.getWidth() -5 then
-      player.x = player.x + player.speed*dt
+      player.x = player.x + moveSpeed*dt
     end
     if love.keyboard.isDown("a") and player.x > 5 then
-      player.x = player.x - player.speed*dt
+      player.x = player.x - moveSpeed*dt
     end
     if love.keyboard.isDown("w") and player.y > 5 then
-      player.y = player.y - player.speed*dt
+      player.y = player.y - moveSpeed*dt
     end
     if love.keyboard.isDown("s") and player.y < love.graphics.getHeight() -5  then
-      player.y = player.y + player.speed*dt
+      player.y = player.y + moveSpeed*dt
     end
   end
 
@@ -45,11 +53,17 @@ function love.update(dt)
     z.y = z.y + (math.sin( zombiePlayerAngle(z) ) * z.speed * dt)
 
     if distanceBetween(z.x, z.y, player.x, player.y) < 30 then
-      for i,z in ipairs(zombies) do
-        zombies[i] = nil
-        gameState = 1
-        player.x = love.graphics.getWidth()/2
-        player.y = love.graphics.getHeight()/2
+      if player.injured == false then
+        player.injured = true
+        z.dead = true
+      else
+        for i,z in ipairs(zombies) do
+          zombies[i] = nil
+          gameState = 1
+          player.injured = false
+          player.x = love.graphics.getWidth()/2
+          player.y = love.graphics.getHeight()/2
+        end
       end
     end
   end
@@ -103,6 +117,9 @@ end
 
 function love.draw()
   love.graphics.draw(sprites.background)
+  if player.injured then
+    love.graphics.setColor(1,0,0)
+  end
   love.graphics.draw(
     sprites.player, 
     player.x, 
@@ -113,6 +130,7 @@ function love.draw()
     sprites.player:getWidth()/2, 
     sprites.player:getHeight()/2
   )
+  love.graphics.setColor(1,1,1)
 
   if gameState == 1 then
     love.graphics.setFont(myFont)
